@@ -1,7 +1,10 @@
 
 type Token = {
     name: string;
-    attributes?: string;
+    attributes?: Array<{
+        name?: string;
+        value?: string | undefined;
+    }>;
     startTag?: boolean;
     endTag?: boolean;
     type: "node" | "text"
@@ -26,7 +29,6 @@ class Toekenizer {
         let DOCTYPE = false;
 
         let elementName = ""
-        let attributes = ""
 
         const tokens: Array<Token> = [];
 
@@ -74,16 +76,7 @@ class Toekenizer {
 
             if(openTag) {
 
-                if(nextChar !== " ") {
-
-                    elementName += char
-
-                } else {
-
-                    // attribute
-                    attributes += char
-
-                }
+                elementName += char
 
                 if(nextChar === ">") {
 
@@ -91,16 +84,23 @@ class Toekenizer {
 
                         tokens.push({
                             name: elementName,
-                            attributes,
                             endTag: true,
                             type: "node"
                         })
     
                     } else {
 
+                        // gather attributes
+                        const elementNameParts = elementName.split(" ")
+
+                        // first is the element name
+                        const name = elementNameParts[0];
+
+                        const elementAttributes = this.processAttributes(elementNameParts.slice(1))
+
                         tokens.push({
-                            name: elementName,
-                            attributes,
+                            name,
+                            attributes: elementAttributes,
                             startTag: true,
                             type: "node"
                         })
@@ -108,7 +108,6 @@ class Toekenizer {
                     }
 
                     elementName = ""
-                    attributes = ""
 
                     openTag = false;
                     continue;
@@ -149,6 +148,26 @@ class Toekenizer {
 
         console.log(tokens)
 
+    }
+
+    private processAttributes(attributes: string[]) {
+
+        return attributes.map((attr) => {
+            const parts = attr.split("=")
+
+            if(parts.length == 2) {
+                return {
+                    name: parts[0],
+                    value: parts[1]
+                }
+            } else {
+                return {
+                    name: parts[0]
+                }
+            }
+
+        })
+        
     }
 
 }
