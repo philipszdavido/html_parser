@@ -1,5 +1,6 @@
+import {ParseTokens} from "./parser2";
 
-type Token = {
+export type Token = {
     name: string;
     attributes?: Array<{
         name?: string;
@@ -10,14 +11,14 @@ type Token = {
     type: "node" | "text"
 }
 
-class Toekenizer {
+class Tokenizer {
 
     constructor(private html: string) {}
 
     public start() {
 
         this.html = this.html.split("").filter(char => {
-            if(char === "\n") {
+            if (char === "\n") {
                 return false
             }
 
@@ -146,7 +147,16 @@ class Toekenizer {
             
         }
 
-        console.log(tokens)
+        const mappedTokens = tokens.map((token, index) => {
+            return {
+                index,
+                ...token
+            }
+        });
+
+        // console.log(mappedTokens)
+
+        return mappedTokens
 
     }
 
@@ -204,4 +214,8 @@ const html2 = `
 
 `
 
-new Toekenizer(html2).start();
+const tokens = new Tokenizer(html2).start();
+
+new ParseTokens(tokens).build()
+
+
