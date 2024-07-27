@@ -8,7 +8,7 @@ export type Token = {
     }>;
     startTag?: boolean;
     endTag?: boolean;
-    type: "node" | "text"
+    type: "node" | "text" | "EOF"
 }
 
 class Tokenizer {
@@ -147,6 +147,11 @@ class Tokenizer {
             
         }
 
+        tokens.push({
+            name: "EOF",
+            type: "EOF",
+        })
+
         const mappedTokens = tokens.map((token, index) => {
             return {
                 index,
@@ -185,14 +190,8 @@ class Tokenizer {
 const html = `
 <html>
   <head>
-  <!-- This is a comment -->
-
-    <title>Sample HTML</title>
+    Sample HTML
   </head>
-  <body>
-    <h1>Hello, World!</h1>
-    <p>This is a paragraph.</p>
-  </body>
 </html>
 `;
 
@@ -214,7 +213,7 @@ const html2 = `
 
 `
 
-const tokens = new Tokenizer(html2).start();
+const tokens = new Tokenizer(html).start();
 
 new ParseTokens(tokens).build()
 

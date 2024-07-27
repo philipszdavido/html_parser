@@ -4,8 +4,11 @@ export class ElementNode {
 
     constructor(
         public name: string,
-        public attributes: Array<any>,
-        public children: ElementNode[]) {
+        public attributes: Array<{
+            name?: string;
+            value?: string | undefined;
+        }>,
+        public children: NodeType[]) {
     }
 
 }
@@ -16,7 +19,7 @@ export class TextNode {
 
 type NodeContainer = ElementNode;
 
-type NodeType = ElementNode | Text;
+type NodeType = ElementNode | TextNode;
 
 export interface TagDefinition {
     closedByParent: boolean;
@@ -79,13 +82,13 @@ export class ParseTokens {
     // }
 
     build() {
-        while (this._peek !== undefined) {
+
+        while (this._peek?.type !== "EOF") {
             if(this._peek.type === "node") {
                 this._consumeStartTag(this._advance())
             } else if (this._peek.type === "text") {
                 this._consumeText(this._advance())
-            }
-            else {
+            } else {
                 this._advance()
             }
         }
@@ -95,6 +98,7 @@ export class ParseTokens {
 
     private _consumeStartTag(startTagToken: any) {
         const node = this._peek
+        // @ts-ignore
         const el = new ElementNode(node.name, node.attributes, []);
         const parentEl = this._getContainer();
         //const isClosedByChild = this.tokens
@@ -142,7 +146,7 @@ export class ParseTokens {
         }
     }
 
-    private _pushContainer(node: NodeType, isClosedByChild: boolean) {
+    private _pushContainer(node: NodeContainer, isClosedByChild: boolean) {
         if (isClosedByChild) {
             this._containerStack.pop();
         }
@@ -155,7 +159,7 @@ export class ParseTokens {
         const text = token?.name;
 
         this._addToParent(
-            new Text(
+            new TextNode(
                 text
             ),
         );
