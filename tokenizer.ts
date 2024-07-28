@@ -1,5 +1,7 @@
 import {ParseTokens} from "./parser2";
 
+const selfClosingTags = ["input", "br"]
+
 export type Token = {
     name: string;
     attributes?: Array<{
